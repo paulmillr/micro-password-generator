@@ -1,7 +1,7 @@
 {
   "name": "micro-password-generator",
   "version": "0.1.0",
-  "description": "Password generation utilities with support for Safari Keychain",
+  "description": "Utilities for password generation and estimation with support for iOS keychain",
   "files": [
     "lib/index.js",
     "lib/esm/index.js",

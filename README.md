@@ -91,7 +91,7 @@ Examples:
   These rules don't significantly increase password entropy (most humans will use mask like 'Aaaaaa1@' or any other popular mask),
   but they means that we cannot simple use mask like `********`, since it can generate passwords which won't satisfy these rules.
 
-### What we want from passwords?
+### What do we want from passwords?
 
 - **_length_**: entering 32 character password for FDE via IPMI java applet on remote server is pretty painful.
   -> 12-16 probably ok, anything with more characters has chance to be truncated by service.
