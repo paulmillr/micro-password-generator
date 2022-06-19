@@ -1,0 +1,50 @@
+{
+  "name": "micro-password-generator",
+  "version": "0.1.0",
+  "description": "Password generation utilities with support for Safari Keychain",
+  "files": [
+    "lib/index.js",
+    "lib/esm/index.js",
+    "lib/esm/package.json",
+    "lib/index.d.ts"
+  ],
+  "main": "lib/index.js",
+  "module": "lib/esm/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/esm/index.js",
+      "default": "./lib/index.js"
+    },
+    "./index.d.ts": "./lib/index.d.ts"
+  },
+  "scripts": {
+    "build": "tsc -d && tsc -p tsconfig.esm.json",
+    "lint": "prettier --check index.ts",
+    "test": "node test/index.js",
+    "test:slow": "node test/slow.js"
+  },
+  "author": "Paul Miller (https://paulmillr.com)",
+  "license": "MIT",
+  "homepage": "https://github.com/paulmillr/micro-password-generator",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulmillr/micro-password-generator.git"
+  },
+  "devDependencies": {
+    "micro-should": "0.2.0",
+    "prettier": "2.6.2",
+    "typescript": "4.7.3"
+  },
+  "keywords": [
+    "passwords",
+    "password",
+    "pass"
+  ],
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://paulmillr.com/funding/"
+    }
+  ]
+}

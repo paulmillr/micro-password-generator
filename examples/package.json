@@ -1,0 +1,10 @@
+{
+  "name": "micro-passwords-example",
+  "version": "1.0.0",
+  "description": "Deterministic password generation utils",
+  "files": [],
+  "dependencies": {
+    "micro-passwords": "file:../",
+    "@noble/hashes": "~1.1.0"
+  }
+}
