@@ -1,9 +1,9 @@
-const assert = require('assert');
-const { should } = require('micro-should');
-const pwd = require('..');
-const crypto = require('crypto');
-const randomBytes = (len) => Uint8Array.from(crypto.randomBytes(len));
+import assert from 'assert';
+import { should } from 'micro-should';
+import crypto from 'crypto';
+import * as pwd from '../index.js';
 
+const randomBytes = (len) => Uint8Array.from(crypto.randomBytes(len));
 const ITERS = 10000000;
 const percent = (n) => Math.ceil(n * 100);
 
@@ -57,4 +57,4 @@ should('Entropy sanity check for Cvccvc-cvccvc-cvccv1', () => {
   verifyEntropy(res);
 });
 
-if (require.main === module) should.run();
+should.run();
