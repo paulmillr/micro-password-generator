@@ -1,7 +1,8 @@
-const assert = require('assert');
-const { should } = require('micro-should');
-const pwd = require('..');
-const crypto = require('crypto');
+import assert from 'assert';
+import { should } from 'micro-should';
+import crypto from 'crypto';
+import * as pwd from '../index.js';
+
 const sha256 = (buf) => Uint8Array.from(crypto.createHash('sha256').update(buf).digest());
 
 should('Set utils', () => {
@@ -148,4 +149,4 @@ should('Estimates', () => {
   });
 });
 
-if (require.main === module) should.run();
+should.run();

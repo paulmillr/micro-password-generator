@@ -1,3 +1,4 @@
+/*! micro-password-generator - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 export type Bytes = Uint8Array;
 
 // generic utils
