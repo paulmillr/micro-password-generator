@@ -13,19 +13,7 @@ function bytesToHex(uint8a: Uint8Array): string {
   return hex;
 }
 
-function numberToHexUnpadded(num: number | bigint): string {
-  let hex = num.toString(16);
-  hex = hex.length & 1 ? `0${hex}` : hex;
-  return hex;
-}
-
-function strip0x(hex: string) {
-  return hex.replace(/^0x/i, '');
-}
-
 function hexToBytes(hex: string): Uint8Array {
-  hex = strip0x(hex);
-  hex = hex.length & 1 ? `0${hex}` : hex;
   if (typeof hex !== 'string') {
     throw new TypeError('hexToBytes: expected string, got ' + typeof hex);
   }
@@ -39,6 +27,13 @@ function hexToBytes(hex: string): Uint8Array {
     array[i] = byte;
   }
   return array;
+}
+
+// Returns variable number bytes (minimal bigint encoding?)
+function numberToVarBytesBE(num: number | bigint): Uint8Array {
+  let hex = num.toString(16);
+  if (hex.length & 1) hex = `0${hex}`;
+  return hexToBytes(hex);
 }
 
 function bytesToNumber(bytes: Uint8Array): bigint {
@@ -68,19 +63,19 @@ export function formatDuration(dur: number) {
     parts.push(`${value}${name}`);
     dur -= value * period;
   }
-  return !parts.length ? '0 sec' : parts.join(' ');
+  return parts.length > 0 ? parts.join(' ') : '0 sec';
 }
 
 // set utils
-export function or<T>(...sets: Set<T>[]) {
+export function or<T>(...sets: Set<T>[]): Set<T> {
   return sets.reduce((acc, i) => new Set([...acc, ...i]), new Set());
 }
 
-export function and<T>(...sets: Set<T>[]) {
+export function and<T>(...sets: Set<T>[]): Set<T> {
   return sets.reduce((acc, i) => new Set(Array.from(acc).filter((j) => i.has(j))));
 }
 
-export function product(...sets: Set<string>[]) {
+export function product(...sets: Set<string>[]): Set<string> {
   return sets.reduce(
     (acc, i) =>
       new Set(
@@ -90,6 +85,7 @@ export function product(...sets: Set<string>[]) {
       )
   );
 }
+
 // NOTE: all items inside alphabet size should have same size
 export const alphabet: Record<string, Set<string>> = {};
 // Digits
@@ -125,14 +121,20 @@ function idx<T>(arr: Array<T> | Set<T>, i: number): T {
   if (i < 0 || i >= arr.length) throw new Error('Out of bounds index access');
   return arr[i];
 }
-// Check if password is correct for rules in design rationale
-export function checkPassword(pwd: string) {
+
+/**
+ * Check if password is correct for rules in design rationale.
+ */
+export function checkPassword(pwd: string): boolean {
   if (pwd.length < 8) return false;
   const s = new Set(pwd);
   for (const c of 'aA1@') if (!and(s, alphabet[c]).size) return false;
   return true;
 }
-// Like base convertInt, but with variable size alphabet
+
+/**
+ * Like base convertInt, but with variable size alphabet.
+ */
 function splitEntropy(lengths: number[], entropy: Bytes) {
   let entropyLeft = bytesToNumber(entropy);
   let values = [];
@@ -144,14 +146,16 @@ function splitEntropy(lengths: number[], entropy: Bytes) {
   return { values, entropyLeft };
 }
 
-export function cardinalityBits(cardinality: bigint) {
+export function cardinalityBits(cardinality: bigint): number {
   let i = 0;
   for (let c = cardinality; c; i++, c >>= 1n);
   return i - 1;
 }
+
 // Estimates
-const guessTime = (cardinality: bigint, perSec: number) =>
-  formatDuration((Number(cardinality) / perSec) * 1000);
+function guessTime(cardinality: bigint, perSec: number): string {
+  return formatDuration((Number(cardinality) / perSec) * 1000);
+}
 
 function passwordScore(cardinality: bigint) {
   const scores: [number, string][] = [
@@ -170,11 +174,17 @@ function passwordScore(cardinality: bigint) {
   return res;
 }
 
+/**
+ * Estimate attack price for a password.
+ * @returns `{ luks, filevault2, macos, pbkdf2 }`
+ */
 function estimateAttack(cardinality: bigint) {
-  // Time estimates are not correct, we don't know how much hardware attacker has, it is better to estimate price of an attack.
-  // There we do napkin math of TCO (total cost of ownership) of rig and calculating attack price based on it
+  // Time estimates are not correct: we don't know how much hardware an attacker
+  // has, it is better to estimate price of an attack. We do napkin math of TCO
+  // (total cost of ownership) of a rig and calculate attack price based on it.
 
-  // Full price of single GPU with included price CPU/MB/PSU (but each card of rig takes only part of these costs)
+  // Full price of single GPU with included price CPU/MB/PSU
+  // (but each card of rig takes only part of these costs)
   // Based on: https://bitcoinmerch.com/products/ready-to-mine™-6-x-nvidia-rtx-3080-non-lhr-complete-mining-rig-assembled
   const GPU_PRICE = 20500 / 6;
   // Cost of 1s of GPU time, assuming card will be used at least for 2 years
@@ -202,8 +212,10 @@ function estimateAttack(cardinality: bigint) {
       slow: guessTime(cardinality, 10000),
       fast: guessTime(cardinality, 10000000000),
     },
-    // NOTE: assuming password is salted, since non-salted passwords allows multi-target attack which significantly reduces costs.
-    // hashes per sec from https://gist.github.com/Chick3nman/bb22b28ec4ddec0cb5f59df97c994db4
+    // Password is assumed salted.
+    // Non-salted passwords allow multi-target attacks which significantly reduces costs.
+    // Values taken from hashcat 6.1.1 on RTX 3080
+    // https://gist.github.com/Chick3nman/bb22b28ec4ddec0cb5f59df97c994db4
     costs: {
       luks: calcCost(22779), // linux FDE
       filevault2: calcCost(151300), // macOS FDE
@@ -251,7 +263,7 @@ class Mask {
       (acc, [s, v]) => acc * BigInt(s.size) + BigInt(v),
       0n
     );
-    return hexToBytes(numberToHexUnpadded(entropyLeft * this.cardinality + num));
+    return numberToVarBytesBE(entropyLeft * this.cardinality + num);
   }
   estimate() {
     return estimateAttack(this.cardinality);
@@ -302,7 +314,7 @@ export const secureMask: MaskType = (() => {
     apply: (entropy: Bytes): ApplyResult => {
       let entropyLeft = bytesToNumber(entropy);
       const idx = Number(entropyLeft % size);
-      return mask(secureMasks[idx]).apply(hexToBytes(numberToHexUnpadded(entropyLeft / size)));
+      return mask(secureMasks[idx]).apply(numberToVarBytesBE(entropyLeft / size));
     },
     inverse(res: ApplyResult) {
       const chars = res.password.split('');
@@ -311,7 +323,7 @@ export const secureMask: MaskType = (() => {
           const possibleValues = Object.entries(alphabet)
             .filter(([c, _]) => ['c', 'v', 'C', 'V', '1'].includes(c))
             .map(([c, v]): [string, Set<string>] => [c, and(v, new Set([i]))])
-            .filter(([_, v]) => v.size);
+            .filter(([_, v]) => v.size > 0);
           if (possibleValues.length > 1)
             throw new Error('Too much possible values, cannot detect mask.');
           return possibleValues.length ? possibleValues[0][0] : i;
@@ -321,7 +333,7 @@ export const secureMask: MaskType = (() => {
       if (idx < 0) throw new Error('Unknown mask');
       const entropy = mask(secureMasks[idx]).inverse(res);
       const entropyNum = bytesToNumber(entropy);
-      return hexToBytes(numberToHexUnpadded(entropyNum * size + BigInt(idx)));
+      return numberToVarBytesBE(entropyNum * size + BigInt(idx));
     },
   };
 })();
