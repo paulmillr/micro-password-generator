@@ -41,10 +41,5 @@
     "macos",
     "secure"
   ],
-  "funding": [
-    {
-      "type": "individual",
-      "url": "https://paulmillr.com/funding/"
-    }
-  ]
+  "funding": "https://paulmillr.com/funding/"
 }
