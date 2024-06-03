@@ -13,22 +13,16 @@ The package has been integrated into micro-key-producer. It is now deprecated.
 - Supports iOS / macOS Safari Secure Password from Keychain
 - Provides ZXCVBN Score for password bruteforce estimation
 
-![screenshot](https://user-images.githubusercontent.com/574696/174477173-90780039-fe52-4406-ab94-3ade837ba8c6.jpg)
-
 ## Examples
 
 ```js
 import * as pwd from 'micro-password-generator';
-import { scrypt } from '@noble/hashes/scrypt';
 // Use cryptographically secure RNG. Do not use Math.random(), it's not secure
 import { randomBytes } from '@noble/hashes/utils';
 
 (async () => {
-  const seed = scrypt('main-password', 'user@gmail.com', { N: 2 ** 18, r: 8, p: 1 });
-
-  // Deterministic password
-  console.log(pwd.secureMask.apply(seed).password);
-  // Secure random password
+  const seed = randomBytes(32);
+  // Random password
   console.log(pwd.secureMask.apply(randomBytes(32)).password);
   // wivfi1-Zykrap-fohcij, will change on each run
 
