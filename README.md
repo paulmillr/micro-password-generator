@@ -2,6 +2,12 @@
 
 Utilities for password generation with support for iOS keychain.
 
+## Switch to [micro-key-producer](https://github.com/paulmillr/micro-key-producer)
+
+The package has been integrated into micro-key-producer. It is now deprecated.
+
+---
+
 - Maps bytes to passwords using masks
 - No dependencies
 - Supports iOS / macOS Safari Secure Password from Keychain
@@ -18,7 +24,7 @@ import { scrypt } from '@noble/hashes/scrypt';
 import { randomBytes } from '@noble/hashes/utils';
 
 (async () => {
-  const seed = scrypt('main-password', 'user@gmail.com', { N: 2**18, r: 8, p: 1 });
+  const seed = scrypt('main-password', 'user@gmail.com', { N: 2 ** 18, r: 8, p: 1 });
 
   // Deterministic password
   console.log(pwd.secureMask.apply(seed).password);
