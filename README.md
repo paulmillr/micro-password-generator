@@ -1,12 +1,14 @@
 # micro-password-generator
 
-Utilities for password generation with support for iOS keychain.
+> [!WARNING]  
+> The repository has been merged into [micro-key-producer](https://github.com/paulmillr/micro-key-producer). Please head to the new repo for updates.
 
-## Switch to [micro-key-producer](https://github.com/paulmillr/micro-key-producer)
-
-The package has been integrated into micro-key-producer. It is now deprecated.
+    npm install micro-key-producer
 
 ---
+
+Utilities for password generation with support for iOS keychain.
+
 
 - Maps bytes to passwords using masks
 - No dependencies
